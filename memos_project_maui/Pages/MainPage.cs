@@ -18,7 +18,7 @@ public class MainPage : ContentPage
 
 		Title = "Walks";
 
-		Content = new Grid()
+        Content = new Grid()
 		{
 			Children =
 			{
@@ -40,8 +40,20 @@ public class MainPage : ContentPage
 		};
 	}
 
-	private void AddButtonClicked(object sender, EventArgs e)
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+		FetchWalks();
+    }
+
+	private async void FetchWalks()
 	{
-		// TODO: should take to a record new walk/jog/run
+		var walks = await _database.GetWalksAsync();
+		_walks = new ObservableCollection<Walk>(walks);
+	}
+
+    private void AddButtonClicked(object sender, EventArgs e)
+	{
+		Shell.Current.GoToAsync(nameof(NewWalkPage));
 	}
 }
