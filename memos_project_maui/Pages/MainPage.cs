@@ -8,13 +8,18 @@ namespace memos_project_maui.Pages;
 
 public class MainPage : ContentPage
 {
-	private ObservableCollection<Walk> _walks;
-	private readonly IWalkingDatabase _database; 
+	private List<Walk> _walks;
+	private readonly IWalkingDatabase _database;
+
+	private CollectionView _walksDisplay = new()
+	{
+		ItemTemplate = UIUtils.MakeWalkCardTemplate()
+	};
 
 	public MainPage(IWalkingDatabase database)
 	{
 		_database = database;
-		_walks = new ObservableCollection<Walk>();
+		_walks = new();
 
 		Title = "Walks";
 
@@ -22,12 +27,7 @@ public class MainPage : ContentPage
 		{
 			Children =
 			{
-				new CollectionView()
-				{
-					ItemTemplate = UIUtils.MakeWalkCardTemplate()
-				}
-				.Bind(CollectionView.ItemsSourceProperty, nameof(_walks))
-				.ZIndex(0),
+				_walksDisplay.ZIndex(0),
 				UIUtils.MakeCircularButton(
 					AddButtonClicked,
 					backgroundColor: Constants.PrimaryColor,
@@ -48,9 +48,12 @@ public class MainPage : ContentPage
 
 	private async void FetchWalks()
 	{
-		var walks = await _database.GetWalksAsync();
-		_walks = new ObservableCollection<Walk>(walks);
-	}
+		_walks = await _database.GetWalksAsync();
+		MainThread.BeginInvokeOnMainThread(() =>
+		{
+			_walksDisplay.ItemsSource = _walks;
+		});
+    }
 
     private void AddButtonClicked(object sender, EventArgs e)
 	{

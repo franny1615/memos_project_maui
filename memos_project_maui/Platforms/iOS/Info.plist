@@ -32,5 +32,12 @@
   <string>Location data is needed to produce walk metrics.</string>
   <key>NSLocationWhenInUseUsageDescription</key>
   <string>Location data is needed to produce walk metrics.</string>
+  <key>NSLocationTemporaryUsageDescriptionDictionary</key>
+	<array>
+	<dict>
+		<key>TemporaryFullAccuracyUsageDescription</key>
+		<string>Location accuracy needed to draw path on map.</string>
+	</dict>
+	</array>
 </dict>
 </plist>

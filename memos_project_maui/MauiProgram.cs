@@ -3,6 +3,7 @@ using CommunityToolkit.Maui.Core;
 using CommunityToolkit.Maui.Markup;
 using memos_project_maui.Database;
 using memos_project_maui.Pages;
+using memos_project_maui.ViewModels;
 
 namespace memos_project_maui;
 
@@ -28,6 +29,9 @@ public static class MauiProgram
 
 		// databases
 		builder.Services.AddTransient<IWalkingDatabase, WalkingDatabase>();
+
+		// viewmodels
+		builder.Services.AddTransient<IMainViewModel, MainViewModel>();
 
 		return builder.Build();
 	}

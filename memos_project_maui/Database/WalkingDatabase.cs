@@ -1,4 +1,5 @@
-﻿using memos_project_maui.Models;
+﻿using System.Text.Json;
+using memos_project_maui.Models;
 using SQLite;
 
 namespace memos_project_maui.Database;
@@ -6,9 +7,12 @@ namespace memos_project_maui.Database;
 public interface IWalkingDatabase
 {
     public Task<List<Walk>> GetWalksAsync();
-    public Task<Walk> GetWalkById(int id);
-    public Task<int> SaveWalk(Walk walk);
-    public Task<int> DeleteItemAsync(Walk walk);
+    public Task<Walk> GetWalkByIdAsync(int id);
+    public void SaveWalkAsync(Walk walk);
+    public void DeleteWalkAsync(Walk walk);
+    public void SaveLocationPointsForWalkAsync(
+        Walk walk,
+        List<Location> locations);
 }
 
 public class WalkingDatabase : IWalkingDatabase
@@ -23,7 +27,8 @@ public class WalkingDatabase : IWalkingDatabase
         }
 
         Database = new SQLiteAsyncConnection(Constants.DatabasePath, Constants.Flags);
-        var result = await Database.CreateTableAsync<Walk>();
+        await Database.CreateTableAsync<Walk>();
+        await Database.CreateTableAsync<LocationPoints>();
     }
 
     public async Task<List<Walk>> GetWalksAsync()
@@ -32,7 +37,7 @@ public class WalkingDatabase : IWalkingDatabase
         return await Database.Table<Walk>().ToListAsync();
     }
 
-    public async Task<Walk> GetWalkById(int id)
+    public async Task<Walk> GetWalkByIdAsync(int id)
     {
         await Init();
         return await Database
@@ -41,18 +46,42 @@ public class WalkingDatabase : IWalkingDatabase
             .FirstOrDefaultAsync();
     }
 
-    public async Task<int> SaveWalk(Walk walk)
+    // returns last updated/inserted row
+    public async void SaveWalkAsync(Walk walk)
     {
         await Init();
         if (walk.Id != 0)
-            return await Database.UpdateAsync(walk);
+            await Database.UpdateAsync(walk);
         else
-            return await Database.InsertAsync(walk);
+            await Database.InsertAsync(walk);
     }
 
-    public async Task<int> DeleteItemAsync(Walk walk)
+    public async void SaveLocationPointsForWalkAsync(
+        Walk walk,
+        List<Location> locations)
     {
         await Init();
-        return await Database.DeleteAsync(walk);
+
+        List<LocationPoints> points = new();
+        locations.ForEach(async (loc) =>
+        {
+            try
+            {
+                LocationPoints point = new();
+                point.LocationJsonString = JsonSerializer.Serialize(loc);
+                points.Add(point);
+            }
+            catch { }
+        });
+
+        await Database.InsertAllAsync(points);
+    }
+
+    public async void DeleteWalkAsync(Walk walk)
+    {
+        await Init();
+
+        await Database.DeleteAsync(walk);
+        // TODO: find all location points for this walk and delete them as well. 
     }
 }
