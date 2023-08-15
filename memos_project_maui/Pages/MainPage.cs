@@ -1,8 +1,8 @@
+using System.Diagnostics;
 using CommunityToolkit.Maui.Markup;
 using memos_project_maui.Database;
 using memos_project_maui.Models;
 using memos_project_maui.Utilities;
-using System.Collections.ObjectModel;
 
 namespace memos_project_maui.Pages;
 
@@ -13,7 +13,7 @@ public class MainPage : ContentPage
 
 	private CollectionView _walksDisplay = new()
 	{
-		ItemTemplate = UIUtils.MakeWalkCardTemplate()
+		Margin = new Thickness(8)
 	};
 
 	public MainPage(IWalkingDatabase database)
@@ -22,6 +22,7 @@ public class MainPage : ContentPage
 		_walks = new();
 
 		Title = "Walks";
+		_walksDisplay.ItemTemplate = UIUtils.MakeWalkCardTemplate(WalkTapped);
 
         Content = new Grid()
 		{
@@ -58,5 +59,10 @@ public class MainPage : ContentPage
     private void AddButtonClicked(object sender, EventArgs e)
 	{
 		Shell.Current.GoToAsync(nameof(NewWalkPage));
+	}
+
+	private void WalkTapped(object sender)
+	{
+		Debug.WriteLine($"");
 	}
 }

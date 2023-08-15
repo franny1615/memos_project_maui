@@ -1,7 +1,6 @@
 ﻿using CommunityToolkit.Maui.Markup;
-using memos_project_maui.Database;
+using memos_project_maui.Utilities;
 using memos_project_maui.ViewModels;
-using Microsoft.Maui.Controls.Maps;
 using Microsoft.Maui.Maps;
 using static CommunityToolkit.Maui.Markup.GridRowsColumns;
 using Maps = Microsoft.Maui.Controls.Maps;
@@ -11,13 +10,12 @@ namespace memos_project_maui.Pages;
 public class NewWalkPage : ContentPage
 {
     private readonly IMainViewModel _mainViewModel;
-    private readonly IWalkingDatabase _database;
 
     private int _durationInSeconds = 0;
     private double _distanceInMiles = 0.0;
 
     private List<Location> _pathLocations;
-    private Polyline _currentPath = null; 
+    private Maps.Polyline _currentPath = null; 
 
     private Maps.Map _map = new()
     {
@@ -27,33 +25,32 @@ public class NewWalkPage : ContentPage
 
     private Label _distanceLabel = new()
     {
-        Text = "Distance: 0.0 mi",
-        FontSize = 18,
+        Text = "0.0 mi",
+        FontSize = 24,
         VerticalOptions = LayoutOptions.Center,
+        HorizontalTextAlignment = TextAlignment.Center,
         Margin = new Thickness(8)
     };
     private Label _durationLabel = new()
     {
-        Text = "Duration: 00:00:00",
-        FontSize = 18,
+        Text = "00:00:00",
+        FontSize = 32,
         VerticalOptions = LayoutOptions.Center,
+        HorizontalTextAlignment = TextAlignment.Center,
         Margin = new Thickness(8)
     };
     private Button _startStopButton = new()
     {
         Text = "Start",
-        FontSize = 18,
+        FontSize = 20,
         FontAttributes = FontAttributes.Bold,
         BackgroundColor = Constants.PrimaryColor,
         TextColor = Colors.White,
         Margin = new Thickness(8)
     };
 
-	public NewWalkPage(
-        IWalkingDatabase database,
-        IMainViewModel mainViewModel)
+	public NewWalkPage(IMainViewModel mainViewModel)
 	{
-        _database = database;
         _mainViewModel = mainViewModel;
 		Title = "New Walk";
 
@@ -68,19 +65,48 @@ public class NewWalkPage : ContentPage
             }
         });
 
+        Border durationBorder = UIUtils.DataBorder();
+        durationBorder.Content = _durationLabel;
+
+        VerticalStackLayout durationStack = new()
+        {
+            HorizontalOptions = LayoutOptions.Center,
+            Spacing = 4,
+            Children =
+            {
+                UIUtils.DataLabel("Duration"),
+                durationBorder
+            }
+        };
+
+        Border distanceBorder = UIUtils.DataBorder();
+        distanceBorder.Content = _distanceLabel;
+
+        VerticalStackLayout distanceStack = new()
+        {
+            HorizontalOptions = LayoutOptions.Center,
+            Spacing = 4,
+            Children =
+            {
+                UIUtils.DataLabel("Distance"),
+                distanceBorder
+            }
+        };
+
         Content = new Grid
         {
             RowDefinitions = Rows.Define(
-                new GridLength(0.7, GridUnitType.Star),
-                new GridLength(0.1, GridUnitType.Star),
-                new GridLength(0.1, GridUnitType.Star),
+                new GridLength(0.65, GridUnitType.Star),
+                Auto,
+                Auto,
                 new GridLength(0.1, GridUnitType.Star)
             ),
+            RowSpacing = 8,
             Children =
             {
                 _map.Row(0),
-                _durationLabel.Row(1),
-                _distanceLabel.Row(2),
+                durationStack.Row(1),
+                distanceStack.Row(2),
                 _startStopButton.TapGesture(StartStopTapped).Row(3)
             }
         };
@@ -126,11 +152,10 @@ public class NewWalkPage : ContentPage
     private void UpdateDurationLabelWithSeconds(int duration)
     {
         TimeSpan span = TimeSpan.FromSeconds(duration);
-        string spanStr = span.ToString(@"hh\:mm\:ss");
-        _durationLabel.Text = $"Duration: {spanStr}";
+        _durationLabel.Text = span.ToString(@"hh\:mm\:ss");
         _durationInSeconds = duration;
 
-        if (duration % 30 == 0) // every 30 seconds ping location
+        if (duration % 15 == 0) // every x seconds ping location
         {
             UpdateLocation();
             DrawPath();
@@ -144,7 +169,7 @@ public class NewWalkPage : ContentPage
             _map.MapElements.Remove(_currentPath);
         }
 
-        var newPath = new Polyline
+        var newPath = new Maps.Polyline
         {
             StrokeColor = Constants.ThirdColor,
             StrokeWidth = 8
@@ -165,7 +190,7 @@ public class NewWalkPage : ContentPage
         }
 
         _distanceInMiles = Math.Round(distance, 2);
-        _distanceLabel.Text = $"Distance: {_distanceInMiles} mi.";
+        _distanceLabel.Text = $"{_distanceInMiles} mi";
         _map.MapElements.Add(newPath);
     }
 }

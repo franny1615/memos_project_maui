@@ -1,6 +1,4 @@
 ﻿using CommunityToolkit.Maui.Markup;
-using memos_project_maui.Models;
-using Microsoft.Maui.Controls;
 using Microsoft.Maui.Controls.Shapes;
 using static CommunityToolkit.Maui.Markup.GridRowsColumns;
 
@@ -45,18 +43,26 @@ public class UIUtils
         return circularClipping;
     }
 
-    public static DataTemplate MakeWalkCardTemplate()
+    public static DataTemplate MakeWalkCardTemplate(Action<object> onTap)
     {
         return new DataTemplate(() =>
         {
-            Binding id = new("Id");
-            Binding seconds = new("DurationInSeconds");
-            Binding miles = new("DistanceInMiles");
+            Binding Id = new("Id");
+            Binding seconds = new("DurationFormatted");
+            Binding miles = new("DistanceFormatted");
 
-            Label secondsLabel = new();
+            Label secondsLabel = new()
+            {
+                FontSize = 16,
+                TextColor = Colors.White
+            };
             secondsLabel.SetBinding(Label.TextProperty, seconds);
 
-            Label milesLabel = new();
+            Label milesLabel = new()
+            {
+                FontSize = 16,
+                TextColor = Colors.White
+            };
             milesLabel.SetBinding(Label.TextProperty, miles);
 
             var grid = new Grid
@@ -69,7 +75,10 @@ public class UIUtils
                 {
                     new Label
                     {
-                        Text = "Walk"
+                        Text = "Walk",
+                        FontSize = 18,
+                        FontAttributes = FontAttributes.Bold,
+                        TextColor = Colors.White
                     }
                     .Row(0)
                     .ColumnSpan(2),
@@ -78,7 +87,50 @@ public class UIUtils
                 }
             };
 
-            return grid;
+            var border = new Border()
+            {
+                BackgroundColor = Constants.PrimaryColor,
+                Stroke = Colors.Transparent,
+                StrokeShape = new RoundRectangle()
+                {
+                    CornerRadius = 5
+                },
+                Content = grid
+            };
+
+            border.BindingContext = new Binding(".");
+
+            border.TapGesture(() =>
+            {
+                onTap?.Invoke(border.BindingContext);
+            });
+
+            return border;
         });
+    }
+
+    public static Border DataBorder()
+    {
+        return new()
+        {
+            Stroke = Constants.PrimaryColor,
+            StrokeShape = new RoundRectangle()
+            {
+                CornerRadius = 5
+            },
+            Padding = 8,
+            Margin = 0
+        };
+    }
+
+    public static Label DataLabel(string text)
+    {
+        return new()
+        {
+            Text = text,
+            HorizontalTextAlignment = TextAlignment.Center,
+            FontSize = 16,
+            FontAttributes = FontAttributes.Bold
+        };
     }
 }
