@@ -8,11 +8,12 @@ public interface IWalkingDatabase
 {
     public Task<List<Walk>> GetWalksAsync();
     public Task<Walk> GetWalkByIdAsync(int id);
-    public void SaveWalkAsync(Walk walk);
-    public void DeleteWalkAsync(Walk walk);
-    public void SaveLocationPointsForWalkAsync(
+    public Task<int> SaveWalkAsync(Walk walk);
+    public Task DeleteWalkAsync(Walk walk);
+    public Task SaveLocationPointsForWalkAsync(
         Walk walk,
         List<Location> locations);
+    public Task<List<LocationPoints>> GetLocationPointsForWalkIdAsync(int id);
 }
 
 public class WalkingDatabase : IWalkingDatabase
@@ -47,28 +48,32 @@ public class WalkingDatabase : IWalkingDatabase
     }
 
     // returns last updated/inserted row
-    public async void SaveWalkAsync(Walk walk)
+    public async Task<int> SaveWalkAsync(Walk walk)
     {
         await Init();
+
         if (walk.Id != 0)
             await Database.UpdateAsync(walk);
         else
             await Database.InsertAsync(walk);
+
+        return walk.Id;
     }
 
-    public async void SaveLocationPointsForWalkAsync(
+    public async Task SaveLocationPointsForWalkAsync(
         Walk walk,
         List<Location> locations)
     {
         await Init();
 
         List<LocationPoints> points = new();
-        locations.ForEach(async (loc) =>
+        locations.ForEach((loc) =>
         {
             try
             {
                 LocationPoints point = new();
                 point.LocationJsonString = JsonSerializer.Serialize(loc);
+                point.WalkId = walk.Id;
                 points.Add(point);
             }
             catch { }
@@ -77,11 +82,27 @@ public class WalkingDatabase : IWalkingDatabase
         await Database.InsertAllAsync(points);
     }
 
-    public async void DeleteWalkAsync(Walk walk)
+    public async Task DeleteWalkAsync(Walk walk)
     {
         await Init();
 
+        List<LocationPoints> relevantPoints = await GetLocationPointsForWalkIdAsync(walk.Id);
+        relevantPoints.ForEach(async (point) =>
+        {
+            await Database.DeleteAsync(point);
+        });
         await Database.DeleteAsync(walk);
-        // TODO: find all location points for this walk and delete them as well. 
+    }
+
+    public async Task<List<LocationPoints>> GetLocationPointsForWalkIdAsync(int id)
+    {
+        await Init();
+
+        List<LocationPoints> points = await Database
+            .Table<LocationPoints>()
+            .Where((i) => i.WalkId == id)
+            .ToListAsync();
+
+        return points;
     }
 }

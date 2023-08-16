@@ -25,7 +25,7 @@ public static class MauiProgram
 
 		// pages
 		builder.Services.AddTransient<MainPage>();
-		builder.Services.AddTransient<NewWalkPage>();
+		builder.Services.AddTransient<WalkPage>();
 
 		// databases
 		builder.Services.AddTransient<IWalkingDatabase, WalkingDatabase>();

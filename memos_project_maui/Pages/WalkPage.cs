@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Maui.Markup;
+using memos_project_maui.Models;
 using memos_project_maui.Utilities;
 using memos_project_maui.ViewModels;
 using Microsoft.Maui.Maps;
@@ -7,7 +8,7 @@ using Maps = Microsoft.Maui.Controls.Maps;
 
 namespace memos_project_maui.Pages;
 
-public class NewWalkPage : ContentPage
+public class WalkPage : ContentPage, IQueryAttributable
 {
     private readonly IMainViewModel _mainViewModel;
 
@@ -15,7 +16,9 @@ public class NewWalkPage : ContentPage
     private double _distanceInMiles = 0.0;
 
     private List<Location> _pathLocations;
-    private Maps.Polyline _currentPath = null; 
+    private Maps.Polyline _currentPath = null;
+
+    private Walk _pastWalk;
 
     private Maps.Map _map = new()
     {
@@ -25,7 +28,7 @@ public class NewWalkPage : ContentPage
 
     private Label _distanceLabel = new()
     {
-        Text = "0.0 mi",
+        Text = "0 mi",
         FontSize = 24,
         VerticalOptions = LayoutOptions.Center,
         HorizontalTextAlignment = TextAlignment.Center,
@@ -49,8 +52,9 @@ public class NewWalkPage : ContentPage
         Margin = new Thickness(8)
     };
 
-	public NewWalkPage(IMainViewModel mainViewModel)
+	public WalkPage(IMainViewModel mainViewModel)
 	{
+        BindingContext = this;
         _mainViewModel = mainViewModel;
 		Title = "New Walk";
 
@@ -127,11 +131,15 @@ public class NewWalkPage : ContentPage
         });
     }
 
-    private Action StartStopTapped => new(() =>
+    private Action StartStopTapped => new(async () =>
     {
         if (_startStopButton.Text == "Start")
         {
             _startStopButton.Text = "Stop";
+
+            UpdateLocation();
+            DrawPath();
+
             _mainViewModel.StartTimer(UpdateDurationLabelWithSeconds);
         }
         else if (_startStopButton.Text == "Stop")
@@ -141,11 +149,16 @@ public class NewWalkPage : ContentPage
         }
         else if (_startStopButton.Text == "Save")
         {
-            _mainViewModel.SaveWalk(
+            await _mainViewModel.SaveWalk(
                 _pathLocations,
                 durationInSeconds: _durationInSeconds,
                 distanceInMiles: _distanceInMiles);
-            Shell.Current.GoToAsync("..");
+            Dismiss();
+        }
+        else if (_startStopButton.Text == "Delete")
+        {
+            await _mainViewModel.DeleteWalk(_pastWalk);
+            Dismiss();
         }
     });
 
@@ -192,5 +205,45 @@ public class NewWalkPage : ContentPage
         _distanceInMiles = Math.Round(distance, 2);
         _distanceLabel.Text = $"{_distanceInMiles} mi";
         _map.MapElements.Add(newPath);
+    }
+
+    public void ApplyQueryAttributes(IDictionary<string, object> query)
+    {
+        if (query.ContainsKey(nameof(Walk)))
+        {
+            _pastWalk = (Walk)query[nameof(Walk)];
+            SetupPastWalkData();
+        }
+    }
+
+    private async void SetupPastWalkData()
+    {
+        _distanceLabel.Text = $"{Math.Round(_pastWalk.DistanceInMiles, 2)} mi";
+
+        TimeSpan span = TimeSpan.FromSeconds(_pastWalk.DurationInSeconds);
+        _durationLabel.Text = span.ToString(@"hh\:mm\:ss");
+
+        List<Location> pastPolylinePoints = await _mainViewModel.GetLocationsOfWalkAsync(_pastWalk);
+
+        var pastPath = new Maps.Polyline
+        {
+            StrokeColor = Constants.ThirdColor,
+            StrokeWidth = 8
+        };
+
+        pastPolylinePoints.ForEach(pastPath.Geopath.Add);
+        _map.MapElements.Add(pastPath);
+
+        _startStopButton.Text = "Delete";
+    }
+
+    private void Dismiss()
+    {
+        Dictionary<string, object> parameters = new()
+        {
+            { Constants.RefreshWalksKey, true }
+        };
+
+        Shell.Current.GoToAsync("..", parameters);
     }
 }

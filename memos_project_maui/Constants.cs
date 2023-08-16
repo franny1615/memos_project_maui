@@ -18,4 +18,6 @@ public class Constants
     public static readonly Color PrimaryColor = Color.FromArgb("#374A67"); 
     public static readonly Color SecondaryColor = Color.FromArgb("#49111C");
     public static readonly Color ThirdColor = Color.FromArgb("#CE8147");
+
+    public const string RefreshWalksKey = "kRefreshWalks";
 }

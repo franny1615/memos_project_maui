@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using CommunityToolkit.Maui.Markup;
 using memos_project_maui.Database;
 using memos_project_maui.Models;
@@ -6,7 +5,7 @@ using memos_project_maui.Utilities;
 
 namespace memos_project_maui.Pages;
 
-public class MainPage : ContentPage
+public class MainPage : ContentPage, IQueryAttributable
 {
 	private List<Walk> _walks;
 	private readonly IWalkingDatabase _database;
@@ -58,11 +57,31 @@ public class MainPage : ContentPage
 
     private void AddButtonClicked(object sender, EventArgs e)
 	{
-		Shell.Current.GoToAsync(nameof(NewWalkPage));
+		Shell.Current.GoToAsync(nameof(WalkPage));
 	}
 
 	private void WalkTapped(object sender)
 	{
-		Debug.WriteLine($"");
+		Walk pastWalk = (Walk)sender;
+		if (pastWalk == null)
+			return;
+
+		Dictionary<string, object> parameters = new()
+		{
+			{ nameof(Walk), pastWalk }
+		};
+
+		Shell.Current.GoToAsync(nameof(WalkPage), parameters);
 	}
+
+    public void ApplyQueryAttributes(IDictionary<string, object> query)
+    {
+        if (query.ContainsKey(Constants.RefreshWalksKey) &&
+			query[Constants.RefreshWalksKey] is bool)
+		{
+			bool shouldRefresh = (bool)query[Constants.RefreshWalksKey];
+			if (shouldRefresh)
+				FetchWalks();
+		}
+    }
 }

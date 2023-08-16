@@ -1,4 +1,5 @@
-﻿using memos_project_maui.Database;
+﻿using System.Text.Json;
+using memos_project_maui.Database;
 using memos_project_maui.Models;
 
 namespace memos_project_maui.ViewModels;
@@ -8,10 +9,12 @@ public interface IMainViewModel
 	public Task<Location> GetCurrentLocation();
     public void StartTimer(Action<int> secondPassed);
 	public void StopTimer();
-	public void SaveWalk(
+	public Task SaveWalk(
 		List<Location> locationData,
 		int durationInSeconds,
 		double distanceInMiles);
+	public Task<List<Location>> GetLocationsOfWalkAsync(Walk pastWalk);
+	public Task DeleteWalk(Walk walk);
 }
 
 public class MainViewModel : IMainViewModel
@@ -77,7 +80,7 @@ public class MainViewModel : IMainViewModel
 		}
 	}
 
-    public void SaveWalk(
+    public async Task SaveWalk(
 		List<Location> locationData,
 		int durationInSeconds,
 		double distanceInMiles)
@@ -86,8 +89,32 @@ public class MainViewModel : IMainViewModel
 		newWalk.DurationInSeconds = durationInSeconds;
 		newWalk.DistanceInMiles = distanceInMiles;
 
-		_database.SaveWalkAsync(newWalk);
-		_database.SaveLocationPointsForWalkAsync(newWalk, locationData);
+		int idOfInserted = await _database.SaveWalkAsync(newWalk);
+		newWalk.Id = idOfInserted;
+
+		await _database.SaveLocationPointsForWalkAsync(newWalk, locationData);
     }
+
+	public async Task<List<Location>> GetLocationsOfWalkAsync(Walk pastWalk)
+	{
+		List<LocationPoints> points = await _database.GetLocationPointsForWalkIdAsync(pastWalk.Id);
+		List<Location> locations = new();
+
+		points.ForEach((point) =>
+		{
+			try
+			{
+				Location loc = JsonSerializer.Deserialize<Location>(point.LocationJsonString);
+				locations.Add(loc);
+			} catch { }
+		});
+
+		return locations;
+	}
+
+	public async Task DeleteWalk(Walk walk)
+	{
+		await _database.DeleteWalkAsync(walk);
+	}
 }
 
