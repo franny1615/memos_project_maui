@@ -1,7 +1,9 @@
 using CommunityToolkit.Maui.Markup;
+using memos_project_maui.Controls;
 using memos_project_maui.Database;
 using memos_project_maui.Models;
 using memos_project_maui.Utilities;
+using static CommunityToolkit.Maui.Markup.GridRowsColumns;
 
 namespace memos_project_maui.Pages;
 
@@ -15,29 +17,44 @@ public class MainPage : ContentPage, IQueryAttributable
 		Margin = new Thickness(8)
 	};
 
+	private NavBar _navBar = new()
+	{
+		ShowBackButton = false,
+		ShowMenuButton = false,
+		NavTitle = "Walks"
+	};
+
+	private Grid _pageContainer = new()
+	{
+		RowDefinitions = Rows.Define(Auto, Star)
+	};
+
 	public MainPage(IWalkingDatabase database)
 	{
+		Shell.SetNavBarIsVisible(this, false);
 		_database = database;
 		_walks = new();
 
-		Title = "Walks";
 		_walksDisplay.ItemTemplate = UIUtils.MakeWalkCardTemplate(WalkTapped);
 
-        Content = new Grid()
-		{
-			Children =
-			{
-				_walksDisplay.ZIndex(0),
-				UIUtils.MakeCircularButton(
-					AddButtonClicked,
-					backgroundColor: Constants.PrimaryColor,
-					glyphColor: Colors.White)
-				.Margin(new Thickness(0,0,16,16))
-				.Bottom()
-				.End()
-				.ZIndex(1)
-			}
-		};
+		_pageContainer.Children.Add(_navBar.Row(0));
+		_pageContainer.Children.Add(new Grid()
+        {
+            Children =
+            {
+                _walksDisplay.ZIndex(0),
+                UIUtils.MakeCircularButton(
+                    AddButtonClicked,
+                    backgroundColor: Constants.PrimaryColor,
+                    glyphColor: Colors.White)
+                .Margin(new Thickness(0,0,16,16))
+                .Bottom()
+                .End()
+                .ZIndex(1)
+            }
+        }.Row(1));
+
+        Content = _pageContainer;
 	}
 
     protected override void OnAppearing()

@@ -133,4 +133,56 @@ public class UIUtils
             FontAttributes = FontAttributes.Bold
         };
     }
+
+    public static Button MenuButton(EventHandler clicked)
+    {
+        FontImageSource menuIcon = new()
+        {
+            FontFamily = MaterialFont.Name,
+            Glyph = MaterialFont.Menu,
+            Size = 25,
+        };
+
+        menuIcon.SetAppThemeColor(
+            FontImageSource.ColorProperty,
+            Colors.Black,
+            Colors.White);
+
+        return IconButton(menuIcon, clicked);
+    }
+
+    public static Button BackButton(EventHandler clicked)
+    {
+        FontImageSource backIcon = new()
+        {
+            FontFamily = MaterialFont.Name,
+            Glyph = MaterialFont.Arrow_back,
+            Size = 25,
+        };
+
+        backIcon.SetAppThemeColor(
+            FontImageSource.ColorProperty,
+            Colors.Black,
+            Colors.White);
+
+        return IconButton(backIcon, clicked);
+    }
+
+    private static Button IconButton(
+        FontImageSource imageSource,
+        EventHandler clicked)
+    {
+        Button button = new()
+        {
+            ImageSource = imageSource,
+            BackgroundColor = Colors.Transparent,
+            Padding = 0,
+            Margin = 0,
+            VerticalOptions = LayoutOptions.Center,
+            HorizontalOptions = LayoutOptions.Center
+        };
+        button.Clicked += clicked;
+
+        return button;
+    }
 }
