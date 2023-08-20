@@ -6,26 +6,13 @@ namespace memos_project_maui.Utilities;
 
 public class UIUtils
 {
-    public static Border MakeCircularButton(
-        EventHandler onClick,
-        Color backgroundColor,
-        Color glyphColor,
-        int size = 90)
+    public static Border CircularButton(
+        Action onClick,
+        string glyph,
+        int size = 75)
     {
-        Button addButton = new()
-        {
-            Padding = 0,
-            BackgroundColor = Colors.Transparent,
-            ImageSource = new FontImageSource()
-            {
-                FontFamily = MaterialFont.Name,
-                Glyph = MaterialFont.Add,
-                Size = size / 2,
-                Color = glyphColor
-            }
-        };
-
-        addButton.Clicked += onClick;
+        var button = IconButton(MaterialIcon(glyph, size), null);
+        button.GestureRecognizers.Clear();
 
         Border circularClipping = new()
         {
@@ -36,14 +23,47 @@ public class UIUtils
             {
                 CornerRadius = size / 2
             },
-            Content = addButton,
-            BackgroundColor = backgroundColor
+            Content = button,
+            BackgroundColor = Constants.PrimaryColor
         };
+
+        circularClipping.TapGesture(async () =>
+        {
+            await circularClipping.FadeTo(0.5, 100);
+            await circularClipping.FadeTo(1, 100);
+            onClick?.Invoke();
+        });
 
         return circularClipping;
     }
 
-    public static DataTemplate MakeWalkCardTemplate(Action<object> onTap)
+    public static FontImageSource MaterialIcon(string glyph, int size, bool respondsToTheme = false)
+    {
+        if (size > 40) // 48px is max for pixel perfect icon
+        {
+            size = 40;
+        }
+
+        var icon = new FontImageSource()
+        {
+            FontAutoScalingEnabled = false,
+            FontFamily = MaterialFont.Name,
+            Color = Colors.White,
+            Glyph = glyph,
+            Size = size
+        };
+
+        if (respondsToTheme)
+        {
+            icon.SetAppThemeColor(FontImageSource.ColorProperty,
+                Colors.Black,
+                Colors.White);
+        }
+
+        return icon;
+    }
+
+    public static DataTemplate WalkCard(Action<object> onTap)
     {
         return new DataTemplate(() =>
         {
@@ -51,43 +71,53 @@ public class UIUtils
             Binding seconds = new("DurationFormatted");
             Binding miles = new("DistanceFormatted");
 
+            Image clockIcon = new()
+            {
+                Source = MaterialIcon(MaterialFont.Schedule, 24),
+                VerticalOptions = LayoutOptions.Center
+            };
             Label secondsLabel = new()
             {
-                FontSize = 16,
-                TextColor = Colors.White
+                FontSize = 24,
+                TextColor = Colors.White,
+                VerticalOptions = LayoutOptions.Center
             };
             secondsLabel.SetBinding(Label.TextProperty, seconds);
 
+            Image distanceIcon = new()
+            {
+                Source = MaterialIcon(MaterialFont.Distance, 24),
+                VerticalOptions = LayoutOptions.Center
+            };
             Label milesLabel = new()
             {
-                FontSize = 16,
-                TextColor = Colors.White
+                FontSize = 24,
+                TextColor = Colors.White,
+                VerticalOptions = LayoutOptions.Center
             };
             milesLabel.SetBinding(Label.TextProperty, miles);
 
             var grid = new Grid
             {
-                HeightRequest = 70,
                 Padding = 8,
-                RowDefinitions = Rows.Define(Star, Star),
-                ColumnDefinitions = Columns.Define(Star, Star),
+                RowDefinitions = Rows.Define(Auto, Star),
+                ColumnDefinitions = Columns.Define(
+                    Auto,
+                    Star,
+                    new GridLength(0.05, GridUnitType.Star),
+                    Auto,
+                    Star),
+                ColumnSpacing = 4,
                 Children =
                 {
-                    new Label
-                    {
-                        Text = "Walk",
-                        FontSize = 18,
-                        FontAttributes = FontAttributes.Bold,
-                        TextColor = Colors.White
-                    }
-                    .Row(0)
-                    .ColumnSpan(2),
-                    secondsLabel.Row(1).Column(0),
+                    clockIcon.Row(1).Column(3),
+                    distanceIcon.Row(1).Column(0),
+                    secondsLabel.Row(1).Column(4),
                     milesLabel.Row(1).Column(1)
                 }
             };
 
-            var border = new Border()
+            var border = new Border
             {
                 BackgroundColor = Constants.PrimaryColor,
                 Stroke = Colors.Transparent,
@@ -95,10 +125,9 @@ public class UIUtils
                 {
                     CornerRadius = 5
                 },
-                Content = grid
+                Content = grid,
+                BindingContext = new Binding(".")
             };
-
-            border.BindingContext = new Binding(".");
 
             border.TapGesture(() =>
             {
@@ -107,6 +136,29 @@ public class UIUtils
 
             return border;
         });
+    }
+
+    public static Image IconButton(
+        FontImageSource imageSource,
+        Action clicked)
+    {
+        Image img = new()
+        {
+            Source = imageSource,
+            BackgroundColor = Colors.Transparent,
+            Margin = 0,
+            VerticalOptions = LayoutOptions.Center,
+            HorizontalOptions = LayoutOptions.Center,
+        };
+
+        img.TapGesture(async () =>
+        {
+            await img.FadeTo(0.5, 100);
+            await img.FadeTo(1, 100);
+            clicked?.Invoke();
+        });
+
+        return img;
     }
 
     public static Border DataBorder()
@@ -132,57 +184,5 @@ public class UIUtils
             FontSize = 16,
             FontAttributes = FontAttributes.Bold
         };
-    }
-
-    public static Button MenuButton(EventHandler clicked)
-    {
-        FontImageSource menuIcon = new()
-        {
-            FontFamily = MaterialFont.Name,
-            Glyph = MaterialFont.Menu,
-            Size = 25,
-        };
-
-        menuIcon.SetAppThemeColor(
-            FontImageSource.ColorProperty,
-            Colors.Black,
-            Colors.White);
-
-        return IconButton(menuIcon, clicked);
-    }
-
-    public static Button BackButton(EventHandler clicked)
-    {
-        FontImageSource backIcon = new()
-        {
-            FontFamily = MaterialFont.Name,
-            Glyph = MaterialFont.Arrow_back,
-            Size = 25,
-        };
-
-        backIcon.SetAppThemeColor(
-            FontImageSource.ColorProperty,
-            Colors.Black,
-            Colors.White);
-
-        return IconButton(backIcon, clicked);
-    }
-
-    private static Button IconButton(
-        FontImageSource imageSource,
-        EventHandler clicked)
-    {
-        Button button = new()
-        {
-            ImageSource = imageSource,
-            BackgroundColor = Colors.Transparent,
-            Padding = 0,
-            Margin = 0,
-            VerticalOptions = LayoutOptions.Center,
-            HorizontalOptions = LayoutOptions.Center
-        };
-        button.Clicked += clicked;
-
-        return button;
     }
 }

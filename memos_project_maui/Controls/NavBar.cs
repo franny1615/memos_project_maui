@@ -48,7 +48,7 @@ public class NavBar : Grid
             }
 
             view.Children.Remove(view._menuButton);
-            view.Children.Add(view._backButton.Column(0));
+            view.Children.Add(view._backButton.Column(0).Start());
         });
 
     public bool ShowBackButton
@@ -76,7 +76,7 @@ public class NavBar : Grid
             }
 
             view.Children.Remove(view._backButton);
-            view.Children.Add(view._menuButton.Column(0));
+            view.Children.Add(view._menuButton.Column(0).Start());
         });
 
     public bool ShowMenuButton
@@ -86,26 +86,36 @@ public class NavBar : Grid
     }
     #endregion
 
-    private Button _backButton = UIUtils.BackButton((sender, args) =>
-    {
-        Shell.Current.GoToAsync("..");
-    });
+    private const int _navBarHeight = 45;
+    private const int _actionSize = 24;
+    private const int _titleSize = 18;
 
-    private Button _menuButton = UIUtils.MenuButton((sender, args) =>
-    {
-        // TODO: implement when flyout is supported
-    });
+    private Image _backButton = UIUtils.IconButton(
+        UIUtils.MaterialIcon(MaterialFont.Arrow_back_ios_new, _actionSize, true),
+        new Action(() =>
+        {
+            Shell.Current.GoToAsync("..");
+        }));
+
+    private Image _menuButton = UIUtils.IconButton(
+        UIUtils.MaterialIcon(MaterialFont.Menu, _actionSize, true),
+        new Action(() =>
+        {
+            // TODO: implement when flyout is supported
+        }));
 
     private Label _titleLabel = new()
     {
-        FontSize = 16,
+        FontSize = _titleSize,
+        FontAttributes = FontAttributes.Bold,
         VerticalOptions = LayoutOptions.Center,
         HorizontalTextAlignment = TextAlignment.Center
     };
 
     public NavBar()
 	{
-        HeightRequest = 30;
+        Padding = new Thickness(8,0,8,0);
+        HeightRequest = _navBarHeight;
         BackgroundColor = Colors.Transparent;
         ColumnDefinitions = Columns.Define(
             new GridLength(0.20, GridUnitType.Star),

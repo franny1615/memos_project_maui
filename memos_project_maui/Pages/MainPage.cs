@@ -35,7 +35,7 @@ public class MainPage : ContentPage, IQueryAttributable
 		_database = database;
 		_walks = new();
 
-		_walksDisplay.ItemTemplate = UIUtils.MakeWalkCardTemplate(WalkTapped);
+		_walksDisplay.ItemTemplate = UIUtils.WalkCard(WalkTapped);
 
 		_pageContainer.Children.Add(_navBar.Row(0));
 		_pageContainer.Children.Add(new Grid()
@@ -43,10 +43,9 @@ public class MainPage : ContentPage, IQueryAttributable
             Children =
             {
                 _walksDisplay.ZIndex(0),
-                UIUtils.MakeCircularButton(
+                UIUtils.CircularButton(
                     AddButtonClicked,
-                    backgroundColor: Constants.PrimaryColor,
-                    glyphColor: Colors.White)
+                    glyph: MaterialFont.Add)
                 .Margin(new Thickness(0,0,16,16))
                 .Bottom()
                 .End()
@@ -72,10 +71,10 @@ public class MainPage : ContentPage, IQueryAttributable
 		});
     }
 
-    private void AddButtonClicked(object sender, EventArgs e)
+	private Action AddButtonClicked => () =>
 	{
-		Shell.Current.GoToAsync(nameof(WalkPage));
-	}
+        Shell.Current.GoToAsync(nameof(WalkPage));
+    };
 
 	private void WalkTapped(object sender)
 	{

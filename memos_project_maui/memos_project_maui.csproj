@@ -9,10 +9,10 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 
 		<!-- Display name -->
-		<ApplicationTitle>SWTA</ApplicationTitle>
+		<ApplicationTitle>Pet Walker</ApplicationTitle>
 
 		<!-- App Identifier -->
-		<ApplicationId>com.franciscofunes.SWTA</ApplicationId>
+		<ApplicationId>com.franciscofunes.ATPW</ApplicationId>
 		<ApplicationIdGuid>54737f07-96c2-4577-b844-89b79102e06e</ApplicationIdGuid>
 
 		<!-- Versions -->

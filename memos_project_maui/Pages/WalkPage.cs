@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Maui.Markup;
+using memos_project_maui.Controls;
 using memos_project_maui.Models;
 using memos_project_maui.Utilities;
 using memos_project_maui.ViewModels;
@@ -19,6 +20,18 @@ public class WalkPage : ContentPage, IQueryAttributable
     private Maps.Polyline _currentPath = null;
 
     private Walk _pastWalk;
+
+    private NavBar _navBar = new()
+    {
+        ShowBackButton = true,
+        ShowMenuButton = false,
+        NavTitle = "New Walk"
+    };
+
+    private Grid _pageContainer = new()
+    {
+        RowDefinitions = Rows.Define(Auto, Star)
+    };
 
     private Maps.Map _map = new()
     {
@@ -54,20 +67,11 @@ public class WalkPage : ContentPage, IQueryAttributable
 
 	public WalkPage(IMainViewModel mainViewModel)
 	{
+        Shell.SetNavBarIsVisible(this, false);
         BindingContext = this;
         _mainViewModel = mainViewModel;
-		Title = "New Walk";
 
         _pathLocations = new();
-
-        Shell.SetBackButtonBehavior(this, new BackButtonBehavior
-        {
-            IconOverride = new FontImageSource
-            {
-                FontFamily = MaterialFont.Name,
-                Glyph = MaterialFont.Arrow_back
-            }
-        });
 
         Border durationBorder = UIUtils.DataBorder();
         durationBorder.Content = _durationLabel;
@@ -97,7 +101,8 @@ public class WalkPage : ContentPage, IQueryAttributable
             }
         };
 
-        Content = new Grid
+        _pageContainer.Children.Add(_navBar.Row(0));
+        _pageContainer.Children.Add(new Grid
         {
             RowDefinitions = Rows.Define(
                 new GridLength(0.65, GridUnitType.Star),
@@ -113,7 +118,9 @@ public class WalkPage : ContentPage, IQueryAttributable
                 distanceStack.Row(2),
                 _startStopButton.TapGesture(StartStopTapped).Row(3)
             }
-        };
+        }.Row(1));
+
+        Content = _pageContainer;
 
         UpdateLocation();
     }
@@ -218,6 +225,7 @@ public class WalkPage : ContentPage, IQueryAttributable
 
     private async void SetupPastWalkData()
     {
+        _navBar.NavTitle = "Past Walk";
         _distanceLabel.Text = $"{Math.Round(_pastWalk.DistanceInMiles, 2)} mi";
 
         TimeSpan span = TimeSpan.FromSeconds(_pastWalk.DurationInSeconds);

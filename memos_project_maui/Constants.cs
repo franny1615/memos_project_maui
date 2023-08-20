@@ -15,7 +15,7 @@ public class Constants
     public static string DatabasePath =>
         Path.Combine(FileSystem.AppDataDirectory, DatabaseFilename);
 
-    public static readonly Color PrimaryColor = Color.FromArgb("#374A67"); 
+    public static readonly Color PrimaryColor = Color.FromArgb("#E3170A"); 
     public static readonly Color SecondaryColor = Color.FromArgb("#49111C");
     public static readonly Color ThirdColor = Color.FromArgb("#CE8147");
 

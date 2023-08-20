@@ -19,15 +19,15 @@ public class Walk
 
             if (span.Hours > 0)
             {
-                spanStr += $"{span.Hours}hr(s) ";
+                spanStr += $"{span.Hours} hr(s) ";
             }
             else if (span.Minutes > 0)
             {
-                spanStr += $"{span.Minutes}min(s) ";
+                spanStr += $"{span.Minutes} min(s) ";
             }
             else if (span.Seconds > 0)
             {
-                spanStr += $"{span.Seconds}s";
+                spanStr += $"{span.Seconds} s";
             }
 
             return spanStr;
@@ -38,7 +38,7 @@ public class Walk
     {
         get
         {
-            return $"{Math.Round(DistanceInMiles, 2)}mi";
+            return $"{Math.Round(DistanceInMiles, 2)} mi";
         }
     }
 }
