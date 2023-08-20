@@ -21,7 +21,7 @@ public class MainPage : ContentPage, IQueryAttributable
 	{
 		ShowBackButton = false,
 		ShowMenuButton = false,
-		NavTitle = "Walks"
+		NavTitle = LanguageManager.Instance["Walks"]
 	};
 
 	private Grid _pageContainer = new()

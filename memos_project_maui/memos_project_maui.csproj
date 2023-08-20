@@ -53,6 +53,8 @@
 	  <None Remove="ViewModels\" />
 	  <None Remove="Controls\" />
 	  <None Remove="Resources\Images\" />
+	  <None Remove="Resources\Localization\" />
+	  <None Remove="Resources\Localization\AppLanguage.es" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -69,5 +71,32 @@
 	  <Folder Include="ViewModels\" />
 	  <Folder Include="Controls\" />
 	  <Folder Include="Resources\Images\" />
+	  <Folder Include="Resources\Localization\" />
+	</ItemGroup>
+	<ItemGroup>
+	  <EmbeddedResource Update="Resources\Localization\AppLanguage.es.resx">
+	    <Generator>ResXFileCodeGenerator</Generator>
+	    <LastGenOutput>AppLanguage.es.Designer.cs</LastGenOutput>
+	  </EmbeddedResource>
+	  <EmbeddedResource Update="Resources\Localization\AppLanguage.es.resx">
+	    <Generator>ResXFileCodeGenerator</Generator>
+	    <LastGenOutput>AppLanguage.es.Designer.cs</LastGenOutput>
+	  </EmbeddedResource>
+	  <EmbeddedResource Update="Resources\Localization\AppLanguage.resx">
+	    <Generator>ResXFileCodeGenerator</Generator>
+	    <LastGenOutput>AppLanguage.Designer.cs</LastGenOutput>
+	  </EmbeddedResource>
+	  <EmbeddedResource Update="Resources\Localization\AppLanguage.es.resx">
+	    <Generator>ResXFileCodeGenerator</Generator>
+	    <LastGenOutput>AppLanguage.es.Designer.cs</LastGenOutput>
+	  </EmbeddedResource>
+	</ItemGroup>
+	<ItemGroup>
+	  <Compile Update="Resources\Localization\AppLanguage.Designer.cs">
+	    <DependentUpon>AppLanguage.resx</DependentUpon>
+	  </Compile>
+	  <Compile Update="Resources\Localization\AppLanguage.es.Designer.cs">
+	    <DependentUpon>AppLanguage.es.resx</DependentUpon>
+	  </Compile>
 	</ItemGroup>
 </Project>

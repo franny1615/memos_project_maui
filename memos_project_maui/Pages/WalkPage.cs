@@ -25,7 +25,7 @@ public class WalkPage : ContentPage, IQueryAttributable
     {
         ShowBackButton = true,
         ShowMenuButton = false,
-        NavTitle = "New Walk"
+        NavTitle = LanguageManager.Instance["NewWalk"]
     };
 
     private Grid _pageContainer = new()
@@ -57,7 +57,7 @@ public class WalkPage : ContentPage, IQueryAttributable
     };
     private Button _startStopButton = new()
     {
-        Text = "Start",
+        Text = LanguageManager.Instance["Start"],
         FontSize = 20,
         FontAttributes = FontAttributes.Bold,
         BackgroundColor = Constants.PrimaryColor,
@@ -82,7 +82,7 @@ public class WalkPage : ContentPage, IQueryAttributable
             Spacing = 4,
             Children =
             {
-                UIUtils.DataLabel("Duration"),
+                UIUtils.DataLabel(LanguageManager.Instance["Duration"]),
                 durationBorder
             }
         };
@@ -96,7 +96,7 @@ public class WalkPage : ContentPage, IQueryAttributable
             Spacing = 4,
             Children =
             {
-                UIUtils.DataLabel("Distance"),
+                UIUtils.DataLabel(LanguageManager.Instance["Distance"]),
                 distanceBorder
             }
         };
@@ -140,21 +140,21 @@ public class WalkPage : ContentPage, IQueryAttributable
 
     private Action StartStopTapped => new(async () =>
     {
-        if (_startStopButton.Text == "Start")
+        if (_startStopButton.Text == LanguageManager.Instance["Start"])
         {
-            _startStopButton.Text = "Stop";
+            _startStopButton.Text = LanguageManager.Instance["Stop"];
 
             UpdateLocation();
             DrawPath();
 
             _mainViewModel.StartTimer(UpdateDurationLabelWithSeconds);
         }
-        else if (_startStopButton.Text == "Stop")
+        else if (_startStopButton.Text == LanguageManager.Instance["Stop"])
         {
-            _startStopButton.Text = "Save";
+            _startStopButton.Text = LanguageManager.Instance["Save"];
             _mainViewModel.StopTimer();
         }
-        else if (_startStopButton.Text == "Save")
+        else if (_startStopButton.Text == LanguageManager.Instance["Save"])
         {
             await _mainViewModel.SaveWalk(
                 _pathLocations,
@@ -162,7 +162,7 @@ public class WalkPage : ContentPage, IQueryAttributable
                 distanceInMiles: _distanceInMiles);
             Dismiss();
         }
-        else if (_startStopButton.Text == "Delete")
+        else if (_startStopButton.Text == LanguageManager.Instance["Delete"])
         {
             await _mainViewModel.DeleteWalk(_pastWalk);
             Dismiss();
@@ -225,7 +225,7 @@ public class WalkPage : ContentPage, IQueryAttributable
 
     private async void SetupPastWalkData()
     {
-        _navBar.NavTitle = "Past Walk";
+        _navBar.NavTitle = LanguageManager.Instance["PastWalk"];
         _distanceLabel.Text = $"{Math.Round(_pastWalk.DistanceInMiles, 2)} mi";
 
         TimeSpan span = TimeSpan.FromSeconds(_pastWalk.DurationInSeconds);
@@ -242,7 +242,7 @@ public class WalkPage : ContentPage, IQueryAttributable
         pastPolylinePoints.ForEach(pastPath.Geopath.Add);
         _map.MapElements.Add(pastPath);
 
-        _startStopButton.Text = "Delete";
+        _startStopButton.Text = LanguageManager.Instance["Delete"];
     }
 
     private void Dismiss()
