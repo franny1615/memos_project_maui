@@ -1,14 +1,12 @@
-using System.Collections.ObjectModel;
 using CommunityToolkit.Maui.Markup;
-using memos_project_maui.Controls;
+using System.Collections.ObjectModel;
 using memos_project_maui.Database;
 using memos_project_maui.Models;
 using memos_project_maui.Utilities;
-using static CommunityToolkit.Maui.Markup.GridRowsColumns;
 
 namespace memos_project_maui.Pages;
 
-public class MainPage : ContentPage, IQueryAttributable
+public class MainPage : BasePage, IQueryAttributable
 {
 	private ObservableCollection<Walk> _walks;
 	private readonly IWalkingDatabase _database;
@@ -18,22 +16,13 @@ public class MainPage : ContentPage, IQueryAttributable
 		Margin = new Thickness(8)
 	};
 
-	private NavBar _navBar = new()
+	public MainPage(IWalkingDatabase database) : base()
 	{
-		ShowBackButton = false,
-		ShowMenuButton = false,
-		NavTitle = LanguageManager.Instance["Walks"]
-	};
+		_navBar.ShowBackButton = false;
+		_navBar.ShowMenuButton = false;
+		_navBar.NavTitle = LanguageManager.Instance["Walks"];
 
-	private Grid _pageContainer = new()
-	{
-		RowDefinitions = Rows.Define(Auto, Star)
-	};
-
-	public MainPage(IWalkingDatabase database)
-	{
-		Shell.SetNavBarIsVisible(this, false);
-		_database = database;
+        _database = database;
 		_walks = new();
 
 		var layout = new GridItemsLayout(ItemsLayoutOrientation.Vertical);
@@ -42,8 +31,7 @@ public class MainPage : ContentPage, IQueryAttributable
 		_walksDisplay.ItemTemplate = UIUtils.WalkCard(WalkTapped);
 		_walksDisplay.ItemsSource = _walks;
 
-		_pageContainer.Children.Add(_navBar.Row(0));
-		_pageContainer.Children.Add(new Grid()
+		_pageContent.Content = new Grid()
         {
             Children =
             {
@@ -56,18 +44,16 @@ public class MainPage : ContentPage, IQueryAttributable
                 .End()
                 .ZIndex(1)
             }
-        }.Row(1));
-
-        Content = _pageContainer;
+        };
+        Loaded += MainPage_Loaded;
 	}
 
-    protected override void OnAppearing()
+    private void MainPage_Loaded(object sender, EventArgs e)
     {
-        base.OnAppearing();
 		FetchWalks();
     }
 
-	private async void FetchWalks()
+    private async void FetchWalks()
 	{
 		_walks.Clear();
 		List<Walk> walks = await _database.GetWalksAsync();

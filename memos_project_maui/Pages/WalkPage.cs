@@ -1,5 +1,4 @@
 ﻿using CommunityToolkit.Maui.Markup;
-using memos_project_maui.Controls;
 using memos_project_maui.Models;
 using memos_project_maui.Utilities;
 using memos_project_maui.ViewModels;
@@ -9,7 +8,7 @@ using Maps = Microsoft.Maui.Controls.Maps;
 
 namespace memos_project_maui.Pages;
 
-public class WalkPage : ContentPage, IQueryAttributable
+public class WalkPage : BasePage, IQueryAttributable
 {
     private readonly IMainViewModel _mainViewModel;
 
@@ -20,18 +19,6 @@ public class WalkPage : ContentPage, IQueryAttributable
     private Maps.Polyline _currentPath = null;
 
     private Walk _pastWalk;
-
-    private NavBar _navBar = new()
-    {
-        ShowBackButton = true,
-        ShowMenuButton = false,
-        NavTitle = LanguageManager.Instance["NewWalk"]
-    };
-
-    private Grid _pageContainer = new()
-    {
-        RowDefinitions = Rows.Define(Auto, Star)
-    };
 
     private Maps.Map _map = new()
     {
@@ -65,9 +52,12 @@ public class WalkPage : ContentPage, IQueryAttributable
         Margin = new Thickness(8)
     };
 
-	public WalkPage(IMainViewModel mainViewModel)
+	public WalkPage(IMainViewModel mainViewModel) : base()
 	{
-        Shell.SetNavBarIsVisible(this, false);
+        _navBar.ShowBackButton = true;
+        _navBar.ShowMenuButton = false;
+        _navBar.NavTitle = LanguageManager.Instance["NewWalk"];
+
         BindingContext = this;
         _mainViewModel = mainViewModel;
 
@@ -101,8 +91,7 @@ public class WalkPage : ContentPage, IQueryAttributable
             }
         };
 
-        _pageContainer.Children.Add(_navBar.Row(0));
-        _pageContainer.Children.Add(new Grid
+        _pageContent.Content = new Grid
         {
             RowDefinitions = Rows.Define(
                 new GridLength(0.65, GridUnitType.Star),
@@ -118,9 +107,7 @@ public class WalkPage : ContentPage, IQueryAttributable
                 distanceStack.Row(2),
                 _startStopButton.TapGesture(StartStopTapped).Row(3)
             }
-        }.Row(1));
-
-        Content = _pageContainer;
+        };
 
         UpdateLocation();
     }
