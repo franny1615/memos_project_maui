@@ -147,12 +147,12 @@ public class WalkPage : ContentPage, IQueryAttributable
             UpdateLocation();
             DrawPath();
 
-            _mainViewModel.StartTimer(UpdateDurationLabelWithSeconds);
+            _mainViewModel.StartWalk(UpdateDurationLabelWithSeconds);
         }
         else if (_startStopButton.Text == LanguageManager.Instance["Stop"])
         {
             _startStopButton.Text = LanguageManager.Instance["Save"];
-            _mainViewModel.StopTimer();
+            _mainViewModel.EndWalk();
         }
         else if (_startStopButton.Text == LanguageManager.Instance["Save"])
         {

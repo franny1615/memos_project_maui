@@ -1,14 +1,15 @@
 ﻿using System.Text.Json;
 using memos_project_maui.Database;
 using memos_project_maui.Models;
+using Timer = System.Timers.Timer;
 
 namespace memos_project_maui.ViewModels;
 
 public interface IMainViewModel
 {
 	public Task<Location> GetCurrentLocation();
-    public void StartTimer(Action<int> secondPassed);
-	public void StopTimer();
+    public void StartWalk(Action<int> secondPassed);
+	public void EndWalk();
 	public Task SaveWalk(
 		List<Location> locationData,
 		int durationInSeconds,
@@ -20,7 +21,7 @@ public interface IMainViewModel
 public class MainViewModel : IMainViewModel
 {
 	private readonly IWalkingDatabase _database;
-	private CancellationTokenSource _cancellationToken;
+	private Timer _walkTimer; 
 	private int _totalDuration = 0;
 
 	public MainViewModel(IWalkingDatabase database)
@@ -28,37 +29,27 @@ public class MainViewModel : IMainViewModel
 		_database = database;
 	}
 
-	public void StartTimer(Action<int> secondPassed)
+	public void StartWalk(Action<int> secondPassed)
 	{
 		_totalDuration = 0;
-		_cancellationToken = new();
-
-		Task.Run(() =>
+		_walkTimer = new();
+		_walkTimer.Interval = 1000;
+        _walkTimer.Enabled = true;
+        _walkTimer.Elapsed += (sender, args) =>
 		{
-			TimerLogic(secondPassed);
-		}, _cancellationToken.Token);
-	}
-
-	private async void TimerLogic(Action<int> secondPassed)
-	{
-        while (true)
-        {
-            if (_cancellationToken.Token.IsCancellationRequested)
-                return;
-
             _totalDuration += 1;
             MainThread.BeginInvokeOnMainThread(() =>
             {
                 secondPassed(_totalDuration);
             });
+        };
+		_walkTimer.Start();
+	}
 
-            await Task.Delay(1000); // one second
-        }
-    }
-
-	public void StopTimer()
+	public void EndWalk()
 	{
-		_cancellationToken.Cancel();
+		_walkTimer.Stop();
+		_walkTimer = null;
 	}
 
 	public async Task<Location> GetCurrentLocation()
