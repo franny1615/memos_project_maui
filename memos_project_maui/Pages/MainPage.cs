@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using CommunityToolkit.Maui.Markup;
 using memos_project_maui.Controls;
 using memos_project_maui.Database;
@@ -9,7 +10,7 @@ namespace memos_project_maui.Pages;
 
 public class MainPage : ContentPage, IQueryAttributable
 {
-	private List<Walk> _walks;
+	private ObservableCollection<Walk> _walks;
 	private readonly IWalkingDatabase _database;
 
 	private CollectionView _walksDisplay = new()
@@ -35,7 +36,11 @@ public class MainPage : ContentPage, IQueryAttributable
 		_database = database;
 		_walks = new();
 
+		var layout = new GridItemsLayout(ItemsLayoutOrientation.Vertical);
+		layout.VerticalItemSpacing = 8;
+		_walksDisplay.ItemsLayout = layout;
 		_walksDisplay.ItemTemplate = UIUtils.WalkCard(WalkTapped);
+		_walksDisplay.ItemsSource = _walks;
 
 		_pageContainer.Children.Add(_navBar.Row(0));
 		_pageContainer.Children.Add(new Grid()
@@ -64,10 +69,15 @@ public class MainPage : ContentPage, IQueryAttributable
 
 	private async void FetchWalks()
 	{
-		_walks = await _database.GetWalksAsync();
+		_walks.Clear();
+		List<Walk> walks = await _database.GetWalksAsync();
 		MainThread.BeginInvokeOnMainThread(() =>
 		{
-			_walksDisplay.ItemsSource = _walks;
+			walks.ForEach(async (walk) =>
+			{
+				_walks.Add(walk);
+				await Task.Delay(40);
+			});
 		});
     }
 
